@@ -68,30 +68,32 @@ document.addEventListener('DOMContentLoaded', function () {
 
     audioNextPos = (Math.floor((average / 100) * 100) / 100) * canvas.height
 
-
     if (audioVolumeCanvas <= audioNextPos && showStopRecording) {
-      audioVolumeCanvas += 10
+      audioVolumeCanvas += 30
     } else {
-      audioVolumeCanvas -= 10
+      audioVolumeCanvas -= 30
     }
 
-    ctx.beginPath()
-    ctx.rect(0, barHeight - audioVolumeCanvas, canvas.width, audioVolumeCanvas)
-    ctx.fill()
-    ctx.closePath()
+    for (let i = 0; i < canvas.width; i += 100) {
+      ctx.beginPath()
+      ctx.rect(i, barHeight - audioVolumeCanvas, 80, audioVolumeCanvas)
+      ctx.fill()
+      ctx.closePath()
+    }
   }
 
   function animate() {
     ctx.clearRect(0, 0, canvas.width, canvas.height)
     if (showStopRecording) {
+      visualizeAudio()
+      requestAnimationFrame(animate)
       startButton.classList.add("hide")
       stopButton.classList.remove("hide")
     } else {
+      cancelAnimationFrame(animate)
       startButton.classList.remove("hide")
       stopButton.classList.add("hide")
     }
-    visualizeAudio()
-    requestAnimationFrame(animate)
   }
 
   function stopRecording() {
