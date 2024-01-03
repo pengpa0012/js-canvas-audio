@@ -1,15 +1,8 @@
-
-
-
-// Create initial canvas
-// Record audio
-// Check audio volume
-// Add the volume on the canvas (audio visualizer) 
-
-
 document.addEventListener('DOMContentLoaded', function () {
   let audioContext, mediaRecorder, analyser, dataArray
   let showStopRecording = false
+  let audioVolumeCanvas = 0
+  let audioNextPos = 0
 
   const canvas = document.querySelector("#canvas")
   const ctx = canvas.getContext("2d")
@@ -48,7 +41,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
       mediaRecorder.start()
 
-      visualizeAudio()
+      animate()
     })
     .catch(error => {
       console.error('Error accessing microphone:', error)
@@ -69,18 +62,36 @@ document.addEventListener('DOMContentLoaded', function () {
 
   function visualizeAudio() {
     analyser.getByteFrequencyData(dataArray)
-    // Volume value (Use this for updating bar volume on canvas)
     const average = dataArray.reduce((acc, value) => acc + value, 0) / dataArray.length
     volumeDisplay.textContent = `Volume: ${average.toFixed(2)}`
+    let barHeight = canvas.height
+
+    audioNextPos = (Math.floor((average / 100) * 100) / 100) * canvas.height
+
+
+    if (audioVolumeCanvas <= audioNextPos && showStopRecording) {
+      audioVolumeCanvas += 10
+    } else {
+      audioVolumeCanvas -= 10
+    }
+
+    ctx.beginPath()
+    ctx.rect(0, barHeight - audioVolumeCanvas, canvas.width, audioVolumeCanvas)
+    ctx.fill()
+    ctx.closePath()
+  }
+
+  function animate() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height)
     if (showStopRecording) {
       startButton.classList.add("hide")
       stopButton.classList.remove("hide")
-      requestAnimationFrame(visualizeAudio)
     } else {
       startButton.classList.remove("hide")
       stopButton.classList.add("hide")
-      cancelAnimationFrame(visualizeAudio)
     }
+    visualizeAudio()
+    requestAnimationFrame(animate)
   }
 
   function stopRecording() {
